@@ -228,7 +228,93 @@ ul.ui-autocomplete .ui-menu-item-wrapper.ui-state-focus {
   background-color: var(--header-color) !important;
   color: var(--text-color) !important;
 }
+/* === Fix přetékání portletu Rozvrh === */
+#cpa_664150,
+#prohlizeniAnchor,
+#prohlizeniContent,
+#prohlizeniEntitaContent,
+#prohlizeniDetail,
+#prohlizeniEntitaFormMain,
+form.prohlizeniEntitaFormMain,
+div.prohlizeniEntitaFormMain,
+div.prohlizeniEntitaFormExt {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  display: block !important;
+}
 
+/* Tabulky uvnitř prohlížení (včetně xg_stag_formTable) */
+#prohlizeniContent table,
+#prohlizeniEntitaContent table,
+#prohlizeniDetail table,
+table.xg_stag_formTable {
+  width: auto !important;
+  max-width: 100% !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+}
+/* === Hard fix pro portlet "Prohlížení" (S025) === */
+#cpa_664150,
+#cpa_664150 * {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Scrollbar uvnitř portletu zakázán */
+#cpa_664150::-webkit-scrollbar {
+  display: none;
+}
+.app_container,
+.app_header_wrapper,
+.app_header,
+.clear,
+.app_menu,
+#app_content,
+.app_page_multi,
+.app_footer_tertiary {
+  max-width: 100vw !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+.draggable-portlet {
+  height: auto !important;
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+#modern-portlets-wrapper {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: auto auto auto !important;
+  gap: 20px !important;
+  padding: 10px !important;
+}
+
+.draggable-portlet[data-portlet-id="rozvrh"] {
+  grid-column: 2 !important;
+  grid-row: 1 / 4 !important;
+}
+
+.draggable-portlet[data-portlet-id="info"] {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.draggable-portlet[data-portlet-id="vysledky"] {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+}
+
+.draggable-portlet[data-portlet-id="plneni"] {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+}
 
   `;
   document.head.appendChild(style);
@@ -431,6 +517,49 @@ hamburger.addEventListener("click", () => {
     styleButton.appendChild(dropdown);
     container.appendChild(styleButton);
   };
+
+    function initModernDraggablePortlets() {
+  const ids = ["664147", "664148", "664149", "664150"];
+  const labels = ["info", "vysledky", "plneni", "rozvrh"];
+  const elements = ids.map(id => document.getElementById(id));
+
+  if (elements.every(el => el)) {
+    const newWrapper = document.createElement("div");
+    newWrapper.id = "modern-portlets-wrapper";
+
+    elements.forEach((original, idx) => {
+      const div = document.createElement("div");
+      div.className = "draggable-portlet";
+      div.dataset.portletId = labels[idx];
+      div.innerHTML = original.innerHTML;
+
+      div.style.background = "#fff";
+      div.style.borderRadius = "8px";
+      div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+      div.style.padding = "20px";
+      div.style.boxSizing = "border-box";
+      div.style.minWidth = "300px";
+      div.style.maxWidth = "100%";
+      div.style.height = "fit-content";
+
+      newWrapper.appendChild(div);
+      original.remove();
+    });
+
+    const pageContent = document.querySelector(".app_page_content");
+    if (pageContent) {
+      pageContent.prepend(newWrapper);
+    }
+  } else {
+    setTimeout(initModernDraggablePortlets, 300);
+  }
+}
+
+
+     
+initModernDraggablePortlets();
+
+
 
   initStyleEditor();
 })();
