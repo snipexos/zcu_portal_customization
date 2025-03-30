@@ -1,0 +1,436 @@
+// ==UserScript==
+// @name         Replace ZCU Background Logos & Help Icon + Custom Menu & Style
+// @namespace    http://tampermonkey.net/
+// @version      1.4-clean
+// @description  Customizes ZCU portal with new menu and styles (no rgba)
+// @match        *://portal.zcu.cz/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+  'use strict';
+
+  // === Logo replacement ===
+  const tryReplace = () => {
+    const logoLeft = document.querySelector(".app_header_left");
+    const logoCenter = document.querySelector(".app_header_center");
+
+    if (logoLeft) {
+      logoLeft.style.backgroundImage = "url('https://png.pngtree.com/png-clipart/20220626/original/pngtree-pink-cute-cat-icon-animal-png-yuri-png-image_8188672.png')";
+      logoLeft.style.backgroundSize = "contain";
+      logoLeft.style.backgroundRepeat = "no-repeat";
+      logoLeft.style.backgroundPosition = "left center";
+    }
+
+    if (logoCenter) {
+      logoCenter.style.backgroundImage = "url('https://png.pngtree.com/png-clipart/20240505/original/pngtree-cute-shiba-inu-vector-png-image_15015833.png')";
+      logoCenter.style.backgroundSize = "contain";
+      logoCenter.style.backgroundRepeat = "no-repeat";
+      logoCenter.style.backgroundPosition = "center center";
+    }
+
+    if (!logoLeft || !logoCenter) setTimeout(tryReplace, 100);
+  };
+
+  const tryReplaceHelpIcon = () => {
+    const helpImg = document.querySelector('img[alt="Help"][src*="icon-title_help.png"]');
+    if (helpImg) {
+      helpImg.src = "https://upload.wikimedia.org/wikipedia/commons/5/5a/Black_question_mark.png";
+      helpImg.style.width = "16px";
+      helpImg.style.height = "16px";
+    } else {
+      setTimeout(tryReplaceHelpIcon, 100);
+    }
+  };
+
+  tryReplace();
+  tryReplaceHelpIcon();
+
+  // === Style injection ===
+  const style = document.createElement("style");
+  style.innerHTML = `
+    :root {
+      --background-color: #ffffff;
+      --primary-color: #23549b;
+      --header-color: #23549b;
+      --text-color: #ffffff;
+      --link-color: var(--primary-color);
+      --highlight-color: #0055a5;
+    }
+
+    a, a:active, a:visited, a:hover {
+      color: var(--link-color) !important;
+    }
+
+    td.app_portlet_head_title,
+    td.app_portlet_head_icons,
+    div.app_header,
+    ul.app_menubar {
+      background-color: var(--header-color) !important;
+    }
+
+    ul.app_menubar {
+      border-top: 1px solid var(--header-color);
+      border-bottom: 5px solid #000;
+    }
+
+    ul.app_menubar li.selected a,
+    ul.app_menubar li.selected a:active,
+    ul.app_menubar li.selected a:visited {
+      color: var(--text-color) !important;
+    }
+
+    ul.app_menubar li {
+      display: inline-block;
+      margin: 0;
+      border: none;
+    }
+
+    ul.app_menubar li.selected {
+      border: none;
+      color: black;
+      background-color: var(--header-color);
+    }
+
+    .app_menubar.level_0,
+    .app_menubar.level_1 {
+      display: none !important;
+    }
+
+    div.app_content {
+      border-top: none;
+    }
+
+    #modern-hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--header-color);
+      color: white;
+      font-size: 16px;
+      font-family: sans-serif;
+      border: none;
+      border-radius: 0 0 12px 12px;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: background 0.2s ease;
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+
+    #modern-hamburger:hover {
+      background: var(--background-color);
+      color: #000000;
+    }
+
+    #modern-nav-wrapper {
+      display: none;
+      position: absolute;
+      top: 160px;
+      left: 40px;
+      z-index: 50;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    #modern-nav-wrapper.show {
+      display: flex !important;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #modern-nav-inner {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      max-height: 500px;
+    }
+
+    #modern-main, #modern-sub {
+      background-color: #ffffff;
+      border: none;
+      padding: 12px;
+      width: 220px;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #modern-main {
+      border-radius: 12px 0 0 12px;
+      background-color: color-mix(in srgb, var(--background-color) 10%, transparent);
+    }
+
+    #modern-sub {
+      border-radius: 0 12px 12px 0;
+      overflow-y: auto;
+      max-height: 500px;
+      background-color: color-mix(in srgb, var(--background-color) 10%, transparent);
+    }
+
+    #modern-main a, #modern-sub a {
+      display: block;
+      color: var(--highlight-color);
+      padding: 6px 8px;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    #modern-main a:hover, #modern-sub a:hover {
+      background: #e6f0ff;
+    }
+
+    div.app_page_menu {
+      background-color: var(--background-color);
+    }
+
+    div.app_page_content {
+      border-top: none;
+      margin-bottom: 7px;
+      padding: 0 7px 7px;
+    }
+
+ul.ui-autocomplete {
+  background: white;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  font-family: sans-serif;
+  z-index: 10000 !important;
+}
+
+ul.ui-autocomplete .ui-menu-item {
+  padding: 0; /* odstraníme padding tady */
+}
+
+/* Hlavní wrapper každého výsledku */
+ul.ui-autocomplete .ui-menu-item-wrapper {
+  padding: 6px 10px;
+  font-size: 1rem;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Hover a focus – správně na .ui-state-focus */
+ul.ui-autocomplete .ui-menu-item-wrapper.ui-state-focus {
+  background-color: var(--header-color) !important;
+  color: var(--text-color) !important;
+}
+
+
+  `;
+  document.head.appendChild(style);
+
+  // === Menu logic ===
+  const mainLinks = [
+    { text: "My info", url: "/portal/ja" },
+    { text: "Infoservis", url: "/portal/infoservis" },
+    { text: "Study", url: "/portal/studium" },
+    { text: "Management", url: "/portal/rizeni" }
+  ];
+
+  const hamburger = document.createElement("div");
+  hamburger.id = "modern-hamburger";
+  hamburger.textContent = "☰ Menu";
+
+  const navWrapper = document.createElement("div");
+  navWrapper.id = "modern-nav-wrapper";
+
+  const navInner = document.createElement("div");
+  navInner.id = "modern-nav-inner";
+
+  const mainMenu = document.createElement("div");
+  mainMenu.id = "modern-main";
+
+  const subMenu = document.createElement("div");
+  subMenu.id = "modern-sub";
+
+  function loadSubmenuFromDOM() {
+    subMenu.innerHTML = '';
+    const domSubmenu = document.querySelector('.app_menubar.level_1');
+    if (domSubmenu) {
+      const anchors = domSubmenu.querySelectorAll('li a');
+      anchors.forEach(anchor => {
+        const text = anchor.textContent.trim();
+        if (text) {
+          const subA = document.createElement("a");
+          subA.href = anchor.href;
+          subA.textContent = text;
+          subMenu.appendChild(subA);
+        }
+      });
+    }
+    subMenu.style.display = subMenu.children.length > 0 ? "flex" : "none";
+  }
+
+hamburger.addEventListener("click", () => {
+  const isOpen = navWrapper.classList.contains("show");
+  if (isOpen) {
+    navWrapper.classList.remove("show");
+    setTimeout(() => (navWrapper.style.display = "none"), 250);
+  } else {
+    const rect = hamburger.getBoundingClientRect();
+    navWrapper.style.left = (rect.right + window.scrollX) + "px";
+    navWrapper.style.top = (rect.top + window.scrollY) + "px";
+
+    navWrapper.style.display = "flex";
+    requestAnimationFrame(() => navWrapper.classList.add("show"));
+    loadSubmenuFromDOM();
+  }
+});
+
+
+
+  document.addEventListener("click", (e) => {
+    if (!hamburger.contains(e.target) && !navWrapper.contains(e.target)) {
+      navWrapper.classList.remove("show");
+      navWrapper.style.display = "none";
+    }
+  });
+
+  mainLinks.forEach(link => {
+    const a = document.createElement("a");
+    a.href = link.url;
+    a.textContent = link.text;
+    mainMenu.appendChild(a);
+  });
+
+  navInner.appendChild(mainMenu);
+  navInner.appendChild(subMenu);
+  navWrapper.appendChild(navInner);
+
+  const app_page_menu = document.querySelector('.app_page_menu');
+  if (app_page_menu) {
+    app_page_menu.insertBefore(hamburger, app_page_menu.firstChild);
+  } else {
+    document.body.appendChild(hamburger);
+  }
+
+  document.body.appendChild(navWrapper);
+
+  const hideOriginalMenus = () => {
+    document.querySelectorAll('.app_menubar.level_0, .app_menubar.level_1').forEach(el => {
+      el.style.display = 'none';
+    });
+  };
+  hideOriginalMenus();
+  const observer = new MutationObserver(hideOriginalMenus);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  const firstPortlet = document.querySelector(".app_page_content .app_portlet_frame_in");
+  if (firstPortlet) {
+    firstPortlet.style.padding = "0";
+    firstPortlet.style.margin = "0";
+  }
+
+  // === Simple style editor (bez RGB) ===
+  const initStyleEditor = () => {
+    const container = document.querySelector(".app_header_right .upper div");
+    if (!container) return setTimeout(initStyleEditor, 300);
+
+    const styleButton = document.createElement("button");
+    styleButton.textContent = "🎨 Styl";
+    Object.assign(styleButton.style, {
+      marginLeft: "10px",
+      padding: "3px 6px",
+      cursor: "pointer",
+      background: "#002b5c",
+      color: "#fff",
+      border: "1px solid #aaa",
+      borderRadius: "4px",
+      fontSize: "11px",
+      position: "relative",
+    });
+
+    const dropdown = document.createElement("div");
+    Object.assign(dropdown.style, {
+      position: "absolute",
+      top: "120%",
+      right: "0",
+      background: "#f9f9f9",
+      padding: "10px",
+      border: "1px solid #aaa",
+      borderRadius: "6px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+      display: "none",
+      zIndex: "9999",
+      minWidth: "200px",
+      maxWidth: "300px",
+      color: "#000000"
+    });
+
+    const vars = [
+      { label: "Primární barva", name: "--primary-color" },
+      { label: "Barva hlavičky", name: "--header-color" },
+      { label: "Barva textu", name: "--text-color" },
+    ];
+
+    vars.forEach(v => {
+      const wrapper = document.createElement("div");
+      wrapper.style.marginBottom = "6px";
+
+      const label = document.createElement("label");
+      label.textContent = v.label + ": ";
+      label.style.fontSize = "12px";
+
+      const input = document.createElement("input");
+      input.type = "color";
+
+      let current = getComputedStyle(document.documentElement).getPropertyValue(v.name).trim();
+      if (!/^#[0-9a-f]{6}$/i.test(current)) {
+        const temp = document.createElement("div");
+        temp.style.color = current;
+        document.body.appendChild(temp);
+        current = getComputedStyle(temp).color;
+        document.body.removeChild(temp);
+        const rgb = current.match(/\d+/g);
+        if (rgb) {
+          current = "#" + rgb.map(x => ('0' + parseInt(x).toString(16)).slice(-2)).join("");
+        } else {
+          current = "#000000";
+        }
+      }
+
+      input.value = current;
+      input.addEventListener("input", () => {
+        document.documentElement.style.setProperty(v.name, input.value);
+      });
+
+      wrapper.appendChild(label);
+      wrapper.appendChild(input);
+      dropdown.appendChild(wrapper);
+    });
+
+    let dropdownVisible = false;
+
+    styleButton.addEventListener("click", (e) => {
+      dropdownVisible = !dropdownVisible;
+      dropdown.style.display = dropdownVisible ? "block" : "none";
+      e.stopPropagation();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!styleButton.contains(e.target)) {
+        dropdown.style.display = "none";
+        dropdownVisible = false;
+      }
+    });
+
+    styleButton.appendChild(dropdown);
+    container.appendChild(styleButton);
+  };
+
+  initStyleEditor();
+})();
