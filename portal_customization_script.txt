@@ -316,6 +316,55 @@ table.xg_stag_formTable {
   grid-row: 3 !important;
 }
 
+
+@media (max-width: 768px) {
+  #modern-portlets-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .draggable-portlet {
+    width: 100% !important;
+    flex: none !important;
+    display: block !important;
+    margin-bottom: 16px;
+  }
+
+  #664150 {
+    width: 100% !important;
+    flex: none !important;
+    margin-bottom: 16px;
+    font-size: 0.8rem !important;
+    overflow-x: auto !important;
+  }
+
+  #664150 table {
+    font-size: 0.75rem !important;
+    min-width: unset !important;
+    width: 100% !important;
+    table-layout: auto !important;
+    display: block !important;
+    overflow-x: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  #664150 td, #664150 th {
+    padding: 2px 4px !important;
+    white-space: nowrap !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+#modern-hamburger.menu-open {
+  border-radius: 0 0 0 12px !important; /* levý dolní roh ano, pravý ne */
+}
+
+#modern-main.no-top-left-radius {
+  border-top-left-radius: 0 !important;
+}
+
+
   `;
   document.head.appendChild(style);
 
@@ -343,39 +392,72 @@ table.xg_stag_formTable {
   const subMenu = document.createElement("div");
   subMenu.id = "modern-sub";
 
-  function loadSubmenuFromDOM() {
-    subMenu.innerHTML = '';
-    const domSubmenu = document.querySelector('.app_menubar.level_1');
-    if (domSubmenu) {
-      const anchors = domSubmenu.querySelectorAll('li a');
-      anchors.forEach(anchor => {
-        const text = anchor.textContent.trim();
-        if (text) {
-          const subA = document.createElement("a");
-          subA.href = anchor.href;
-          subA.textContent = text;
-          subMenu.appendChild(subA);
-        }
-      });
-    }
-    subMenu.style.display = subMenu.children.length > 0 ? "flex" : "none";
-  }
+function initModernMenuFromMobile() {
+  mainMenu.innerHTML = '';
 
-hamburger.addEventListener("click", () => {
-  const isOpen = navWrapper.classList.contains("show");
-  if (isOpen) {
-    navWrapper.classList.remove("show");
-    setTimeout(() => (navWrapper.style.display = "none"), 250);
-  } else {
-    const rect = hamburger.getBoundingClientRect();
-    navWrapper.style.left = (rect.right + window.scrollX) + "px";
-    navWrapper.style.top = (rect.top + window.scrollY) + "px";
+  const mobileMainItems = document.querySelectorAll('#mobile_nav_menu_toplinks a');
+  mobileMainItems.forEach(link => {
+    const label = link.textContent.trim();
+    const target = link.getAttribute('data-target');
+    const a = document.createElement('a');
+    a.textContent = label;
+    a.href = "#";
+    a.dataset.mobileTarget = target;
 
-    navWrapper.style.display = "flex";
-    requestAnimationFrame(() => navWrapper.classList.add("show"));
-    loadSubmenuFromDOM();
-  }
+    a.addEventListener('mouseenter', () => {
+      loadMobileSubmenu(target);
+    });
+
+    mainMenu.appendChild(a);
+  });
+}
+
+
+function loadMobileSubmenu(targetId) {
+  subMenu.innerHTML = '';
+  const submenuPanel = document.querySelector(targetId);
+  if (!submenuPanel) return;
+
+  const links = submenuPanel.querySelectorAll('a.page');
+  links.forEach(link => {
+    const a = document.createElement('a');
+    a.href = link.href;
+    a.textContent = link.textContent.trim();
+    subMenu.appendChild(a);
+  });
+
+  subMenu.style.display = subMenu.children.length > 0 ? "flex" : "none";
+}
+
+
+
+let submenuTimer;
+
+hamburger.addEventListener("mouseenter", () => {
+  const rect = hamburger.getBoundingClientRect();
+  navWrapper.style.left = (rect.right + window.scrollX) + "px";
+  navWrapper.style.top = (rect.top + window.scrollY) + "px";
+  navWrapper.style.display = "flex";
+  requestAnimationFrame(() => navWrapper.classList.add("show"));
+
+  hamburger.classList.add("menu-open");
+  mainMenu.classList.add("no-top-left-radius");
+
+  initModernMenuFromMobile();
 });
+
+[navWrapper, hamburger].forEach(el => {
+  el.addEventListener("mouseleave", () => {
+    submenuTimer = setTimeout(() => {
+      navWrapper.classList.remove("show");
+      navWrapper.style.display = "none";
+      hamburger.classList.remove("menu-open");
+      mainMenu.classList.remove("no-top-left-radius");
+    }, 300);
+  });
+});
+
+
 
 
 
@@ -386,12 +468,6 @@ hamburger.addEventListener("click", () => {
     }
   });
 
-  mainLinks.forEach(link => {
-    const a = document.createElement("a");
-    a.href = link.url;
-    a.textContent = link.text;
-    mainMenu.appendChild(a);
-  });
 
   navInner.appendChild(mainMenu);
   navInner.appendChild(subMenu);
