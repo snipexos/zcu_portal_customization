@@ -16,14 +16,14 @@
     const logoCenter = document.querySelector(".app_header_center");
 
     if (logoLeft) {
-      logoLeft.style.backgroundImage = "url('https://png.pngtree.com/png-clipart/20220626/original/pngtree-pink-cute-cat-icon-animal-png-yuri-png-image_8188672.png')";
+      logoLeft.style.backgroundImage = "url('https://github.com/snipexos/zcu_portal_customization/blob/master/IMAGES/zculogo-removedbg.png?raw=true')";
       logoLeft.style.backgroundSize = "contain";
       logoLeft.style.backgroundRepeat = "no-repeat";
       logoLeft.style.backgroundPosition = "left center";
     }
 
     if (logoCenter) {
-      logoCenter.style.backgroundImage = "url('https://png.pngtree.com/png-clipart/20240505/original/pngtree-cute-shiba-inu-vector-png-image_15015833.png')";
+      logoCenter.style.backgroundImage = "url('https://github.com/snipexos/zcu_portal_customization/blob/master/IMAGES/portalZculogo-removedbg.png?raw=true')";
       logoCenter.style.backgroundSize = "contain";
       logoCenter.style.backgroundRepeat = "no-repeat";
       logoCenter.style.backgroundPosition = "center center";
@@ -432,13 +432,72 @@ div.app_page_menu ul li.selected:first-child {
   padding: 16px;
   box-sizing: border-box;
 }
+.app_header_right .upper > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  font-family: sans-serif;
+  font-size: 13px;
+}
 
+.app_header_right .upper a {
+  color: var(--link-color) !important;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
 
+.app_header_right .upper a:hover {
+  background-color: #f0f4ff;
+}
+
+.app_header_right .upper form {
+  margin: 0;
+}
+
+#portal-search-form-desktop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.app_header_right a,
+.app_header_right button,
+.app_header_right .falseLink {
+  background: var(--header-color);
+  color: var(--text-color) !important;
+  padding: 1px 10px !important;
+  border: none;
+  border-radius: 8px;
+  font-family: sans-serif;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app_header_right a:hover,
+.app_header_right button:hover,
+.app_header_right .falseLink:hover {
+  background: var(--highlight-color);
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
   `;
   document.head.appendChild(style);
 
   // === Menu logic ===
-  
+  applySavedTheme();
 
   const hamburger = document.createElement("div");
   hamburger.id = "modern-hamburger";
@@ -565,101 +624,127 @@ setupHoverZone();
   }
 
   // === Simple style editor (bez RGB) ===
-  const initStyleEditor = () => {
-    const container = document.querySelector(".app_header_right .upper div");
-    if (!container) return setTimeout(initStyleEditor, 300);
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.dataset.theme === "dark";
+  html.dataset.theme = isDark ? "light" : "dark";
+  localStorage.setItem("theme", html.dataset.theme);
+}
 
-    const styleButton = document.createElement("button");
-    styleButton.textContent = "🎨 Styl";
-    Object.assign(styleButton.style, {
-      marginLeft: "10px",
-      padding: "3px 6px",
-      cursor: "pointer",
-      background: "#002b5c",
-      color: "#fff",
-      border: "1px solid #aaa",
-      borderRadius: "4px",
-      fontSize: "11px",
-      position: "relative",
-    });
+function applySavedTheme() {
+  const savedTheme = localStorage.getItem("theme");
+  const savedColor = localStorage.getItem("primaryColor");
 
-    const dropdown = document.createElement("div");
-    Object.assign(dropdown.style, {
-      position: "absolute",
-      top: "120%",
-      right: "0",
-      background: "#f9f9f9",
-      padding: "10px",
-      border: "1px solid #aaa",
-      borderRadius: "6px",
-      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-      display: "none",
-      zIndex: "9999",
-      minWidth: "200px",
-      maxWidth: "300px",
-      color: "#000000"
-    });
+  document.documentElement.dataset.theme = savedTheme || "light";
 
-    const vars = [
-      { label: "Primární barva", name: "--primary-color" },
-      { label: "Barva hlavičky", name: "--header-color" },
-      { label: "Barva textu", name: "--text-color" },
-    ];
+  if (savedColor) {
+    document.documentElement.style.setProperty('--primary-color', savedColor);
+  }
+}
 
-    vars.forEach(v => {
-      const wrapper = document.createElement("div");
-      wrapper.style.marginBottom = "6px";
 
-      const label = document.createElement("label");
-      label.textContent = v.label + ": ";
-      label.style.fontSize = "12px";
 
-      const input = document.createElement("input");
-      input.type = "color";
+const initStyleEditor = () => {
+  const container = document.querySelector(".app_header_right .upper div");
+  if (!container) return setTimeout(initStyleEditor, 300);
 
-      let current = getComputedStyle(document.documentElement).getPropertyValue(v.name).trim();
-      if (!/^#[0-9a-f]{6}$/i.test(current)) {
-        const temp = document.createElement("div");
-        temp.style.color = current;
-        document.body.appendChild(temp);
-        current = getComputedStyle(temp).color;
-        document.body.removeChild(temp);
-        const rgb = current.match(/\d+/g);
-        if (rgb) {
-          current = "#" + rgb.map(x => ('0' + parseInt(x).toString(16)).slice(-2)).join("");
-        } else {
-          current = "#000000";
-        }
-      }
+  const styleButton = document.createElement("a");
+  styleButton.textContent = "🎨 Styl";
+  styleButton.className = "falseLink hideForMobile";
+  styleButton.style.cursor = "pointer";
+  styleButton.style.position = "relative";
 
-      input.value = current;
-      input.addEventListener("input", () => {
-        document.documentElement.style.setProperty(v.name, input.value);
-      });
+  container.appendChild(styleButton);
 
-      wrapper.appendChild(label);
-      wrapper.appendChild(input);
-      dropdown.appendChild(wrapper);
-    });
+  const dropdown = document.createElement("div");
+  dropdown.style.position = "absolute";
+  dropdown.style.top = "0";
+  dropdown.style.left = "0";
+  dropdown.style.background = "#fff";
+  dropdown.style.padding = "12px";
+  dropdown.style.border = "1px solid #aaa";
+  dropdown.style.borderRadius = "10px";
+  dropdown.style.boxShadow = "0 2px 10px rgba(0,0,0,0.1)";
+  dropdown.style.display = "none";
+  dropdown.style.zIndex = "9999";
+  dropdown.style.minWidth = "200px";
+  dropdown.style.color = "#000";
+  dropdown.style.fontFamily = "sans-serif";
 
-    let dropdownVisible = false;
+  document.body.appendChild(dropdown);
 
-    styleButton.addEventListener("click", (e) => {
-      dropdownVisible = !dropdownVisible;
-      dropdown.style.display = dropdownVisible ? "block" : "none";
-      e.stopPropagation();
-    });
+  // === Přepínač tmavý/světlý ===
+const modeToggle = document.createElement("button");
+modeToggle.textContent = document.documentElement.dataset.theme === "dark" ? "☀️ Světlý motiv" : "🌙 Tmavý motiv";
+modeToggle.style.display = "block";
+modeToggle.style.marginBottom = "10px";
+modeToggle.style.padding = "6px 10px";
+modeToggle.style.border = "none";
+modeToggle.style.borderRadius = "6px";
+modeToggle.style.cursor = "pointer";
+modeToggle.style.background = "var(--header-color)";
+modeToggle.style.color = "var(--text-color)";
+modeToggle.style.fontFamily = "sans-serif";
 
-    document.addEventListener("click", (e) => {
-      if (!styleButton.contains(e.target)) {
-        dropdown.style.display = "none";
-        dropdownVisible = false;
-      }
-    });
+modeToggle.addEventListener("click", () => {
+  toggleTheme();
+  modeToggle.textContent = document.documentElement.dataset.theme === "dark" ? "☀️ Světlý motiv" : "🌙 Tmavý motiv";
+});
 
-    styleButton.appendChild(dropdown);
-    container.appendChild(styleButton);
-  };
+dropdown.appendChild(modeToggle);
+
+// === Výběr primární barvy ===
+const colorLabel = document.createElement("label");
+colorLabel.textContent = "Primární barva:";
+colorLabel.style.fontSize = "12px";
+colorLabel.style.display = "block";
+colorLabel.style.margin = "4px 0";
+
+const colorInput = document.createElement("input");
+const savedColor = localStorage.getItem("primaryColor");
+colorInput.type = "color";
+colorInput.value = savedColor || getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+colorInput.style.marginBottom = "8px";
+
+colorInput.addEventListener("input", () => {
+  document.documentElement.style.setProperty('--primary-color', colorInput.value);
+  localStorage.setItem("primaryColor", colorInput.value);
+});
+
+dropdown.appendChild(colorLabel);
+dropdown.appendChild(colorInput);
+
+  // === Zobrazit / skrýt ===
+  let dropdownVisible = false;
+
+  styleButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    dropdownVisible = !dropdownVisible;
+
+    if (dropdownVisible) {
+      const rect = styleButton.getBoundingClientRect();
+      dropdown.style.top = `${rect.bottom + window.scrollY}px`;
+      dropdown.style.left = `${rect.right - 200 + window.scrollX}px`;
+      dropdown.style.display = "block";
+    } else {
+      dropdown.style.display = "none";
+    }
+
+    e.stopPropagation();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!styleButton.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = "none";
+      dropdownVisible = false;
+    }
+  });
+};
+
+
+
+
+
 
 function initModernDraggablePortletsUniversal() {
   const originalPortlets = Array.from(document.querySelectorAll(".app_portlet_frame_in"));
